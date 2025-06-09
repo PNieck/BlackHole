@@ -7,4 +7,3 @@
  - [glm](https://github.com/g-truc/glm) - math functions
  - [Dear ImGui](https://github.com/ocornut/imgui) - graphical user interface
  - [Stb](https://github.com/nothings/stb) - textures loading
- - 

@@ -102,6 +102,13 @@ void Shader::SetFloat(const std::string& name, const float value) const
 }
 
 
+void Shader::SetVec2(const std::string &name, const glm::vec2 &vec) const
+{
+    const int location = FindUniformLocation(name);
+    glUniform2f(location, vec.x, vec.y);
+}
+
+
 void Shader::SetVec3(const std::string &name, const glm::vec3 &vec) const
 {
     const int location = FindUniformLocation(name);

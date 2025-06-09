@@ -13,7 +13,7 @@ MainController::MainController(const int width, const int height, GLFWwindow *wi
         .viewportWidth = width,
         .viewportHeight = height,
         .fov = std::numbers::pi_v<float> / 4.f,
-        .nearPlane = 0.1f,
+        .nearPlane = 1.f,
         .farPlane = 100.0f,
     }),
     cubeMap(
@@ -32,7 +32,6 @@ MainController::MainController(const int width, const int height, GLFWwindow *wi
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
     ImGui::StyleColorsDark();
 
@@ -43,6 +42,24 @@ MainController::MainController(const int width, const int height, GLFWwindow *wi
     ImGui_ImplOpenGL3_Init(glsl_version);
 
     UpdateCubeMesh();
+
+    const std::vector<float> vertices = {
+        1,  1, 0,
+        1, -1, 0,
+        -1, -1, 0,
+        -1,  1, 0
+    };
+    const std::vector<uint32_t> indices= {
+        0, 1, 3,
+        1, 2, 3
+    };
+
+    rectangle.Update(vertices, indices);
+
+    camera.SetPosition(glm::vec3(0.f, 0.f, 300.f));
+    distance = length(camera.GetPosition());
+
+    glClearColor(0.5, 0.5f, 0.5f, 1.0f);
 }
 
 
@@ -61,12 +78,27 @@ void MainController::Render()
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    skyboxShader.Use();
-    skyboxShader.SetProjectionMatrix(camera.ProjectionMatrix());
-    skyboxShader.SetViewMatrix(camera.ViewMatrix());
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    blackHoleShader.Use();
+    blackHoleShader.BlackHoleMass(blackHoleMass);
+    blackHoleShader.InverseViewMatrix(inverse(/*camera.ProjectionMatrix() * */camera.ViewMatrix()));
+    blackHoleShader.InversePerspectiveMatrix(inverse(camera.ProjectionMatrix()));
+    blackHoleShader.CameraPos(camera.GetPosition());
 
     cubeMesh.Use();
-    glDrawElements(GL_TRIANGLES, cubeMesh.GetElementsCnt(), GL_UNSIGNED_INT, nullptr);
+
+    rectangle.Use();
+    glDrawElements(GL_TRIANGLES, rectangle.GetElementsCnt(), GL_UNSIGNED_INT, nullptr);
+
+    ImGui::Begin("Options");
+
+    if (ImGui::DragFloat("Distance", &distance)) {
+        camera.SetPosition(normalize(camera.GetPosition()) * distance);
+    }
+    ImGui::DragFloat("Mass", &blackHoleMass);
+
+    ImGui::End();
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

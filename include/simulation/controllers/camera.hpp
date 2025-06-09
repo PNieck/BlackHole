@@ -31,14 +31,17 @@ public:
 
     [[nodiscard]]
     glm::vec3 GetPosition() const
-    { return position; }
+        { return position; }
 
     void SetPosition(const glm::vec3& pos)
-    { position = pos; }
+        { position = pos; }
 
     void SetViewportSize(const int width, const int height)
-    { parameters.viewportWidth = width; parameters.viewportHeight = height; }
+        { parameters.viewportWidth = width; parameters.viewportHeight = height; }
 
+    [[nodiscard]]
+    const CameraParameters& GetParameters() const
+        { return parameters; }
 private:
     glm::vec3 position;
     glm::vec3 up;
