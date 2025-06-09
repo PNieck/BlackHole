@@ -16,6 +16,8 @@ public:
         const std::string& negZTex
     );
 
+    ~CubeMap();
+
     void Use() const {
         glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
     }

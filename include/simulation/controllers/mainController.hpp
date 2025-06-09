@@ -39,6 +39,8 @@ private:
     float distance;
     float blackHoleMass = 1.f;
 
+    bool renderBlackHole = true;
+
     void UpdateCubeMesh();
 
     void RotateCamera(float x, float y);

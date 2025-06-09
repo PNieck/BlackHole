@@ -13,18 +13,27 @@ MainController::MainController(const int width, const int height, GLFWwindow *wi
         .viewportWidth = width,
         .viewportHeight = height,
         .fov = std::numbers::pi_v<float> / 4.f,
-        .nearPlane = 1.f,
+        .nearPlane = 0.1f,
         .farPlane = 100.0f,
     }),
     cubeMap(
-        "../../resources/textures/MountainPath/posx.jpg",
-        "../../resources/textures/MountainPath/negx.jpg",
+        // "../../resources/textures/MountainPath/posx.jpg",
+        // "../../resources/textures/MountainPath/negx.jpg",
+        //
+        // "../../resources/textures/MountainPath/posy.jpg",
+        // "../../resources/textures/MountainPath/negy.jpg",
+        //
+        // "../../resources/textures/MountainPath/posz.jpg",
+        // "../../resources/textures/MountainPath/negz.jpg"
 
-        "../../resources/textures/MountainPath/posy.jpg",
-        "../../resources/textures/MountainPath/negy.jpg",
+        "../../resources/textures/space/right.png",
+        "../../resources/textures/space/left.png",
 
-        "../../resources/textures/MountainPath/posz.jpg",
-        "../../resources/textures/MountainPath/negz.jpg"
+        "../../resources/textures/space/top.png",
+        "../../resources/textures/space/bottom.png",
+
+        "../../resources/textures/space/front.png",
+        "../../resources/textures/space/back.png"
     )
 {
     const auto glsl_version = "#version 410";
@@ -80,16 +89,32 @@ void MainController::Render()
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    blackHoleShader.Use();
-    blackHoleShader.BlackHoleMass(blackHoleMass);
-    blackHoleShader.InverseViewMatrix(inverse(/*camera.ProjectionMatrix() * */camera.ViewMatrix()));
-    blackHoleShader.InversePerspectiveMatrix(inverse(camera.ProjectionMatrix()));
-    blackHoleShader.CameraPos(camera.GetPosition());
+    if (renderBlackHole) {
+        blackHoleShader.Use();
+        blackHoleShader.BlackHoleMass(blackHoleMass);
+        blackHoleShader.InverseViewMatrix(inverse(camera.ViewMatrix()));
+        blackHoleShader.InversePerspectiveMatrix(inverse(camera.ProjectionMatrix()));
+        blackHoleShader.CameraPos(camera.GetPosition());
 
-    cubeMesh.Use();
+        cubeMesh.Use();
 
-    rectangle.Use();
-    glDrawElements(GL_TRIANGLES, rectangle.GetElementsCnt(), GL_UNSIGNED_INT, nullptr);
+        rectangle.Use();
+        glDrawElements(GL_TRIANGLES, rectangle.GetElementsCnt(), GL_UNSIGNED_INT, nullptr);
+    }
+    else {
+        glDepthMask(GL_FALSE);
+
+        skyboxShader.Use();
+        skyboxShader.SetProjectionMatrix(camera.ProjectionMatrix());
+        skyboxShader.SetViewMatrix(camera.ViewMatrix());
+
+        cubeMap.Use();
+        cubeMesh.Use();
+        glDrawElements(GL_TRIANGLES, cubeMesh.GetElementsCnt(), GL_UNSIGNED_INT, nullptr);
+
+        glDepthMask(GL_TRUE);
+    }
+
 
     ImGui::Begin("Options");
 
@@ -97,6 +122,7 @@ void MainController::Render()
         camera.SetPosition(normalize(camera.GetPosition()) * distance);
     }
     ImGui::DragFloat("Mass", &blackHoleMass);
+    ImGui::Checkbox("Render black hole", &renderBlackHole);
 
     ImGui::End();
 

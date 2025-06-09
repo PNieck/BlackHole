@@ -30,10 +30,15 @@ CubeMap::CubeMap(const std::string &posXTex, const std::string &negXTex, const s
 }
 
 
+CubeMap::~CubeMap() {
+    glDeleteTextures(1, &textureID);
+}
+
+
 void CubeMap::SetTexture(const GLenum texType, const std::string &path) const
 {
     int texWidth, texHeight, channels;
-    unsigned char* data = stbi_load(path.c_str(), &texWidth, &texHeight, &channels, 0);
+    unsigned char* data = stbi_load(path.c_str(), &texWidth, &texHeight, &channels, STBI_rgb);
     if (data == nullptr)
         throw std::runtime_error("Error while loading a texture");
 
